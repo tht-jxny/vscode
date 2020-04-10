@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { writeFile } from 'vs/base/node/pfs';
+import { writeFile, exists } from 'vs/base/node/pfs';
 import product from 'vs/platform/product/common/product';
 import { INativeWorkbenchEnvironmentService } from 'vs/workbench/services/environment/electron-browser/environmentService';
 import { IWorkbenchEnvironmentService } from 'vs/workbench/services/environment/common/environmentService';
@@ -40,9 +40,16 @@ export class DefaultConfigurationExportHelper {
 	}
 
 	private writeConfigModelAndQuit(targetPath: string): Promise<void> {
+		console.log(`writeConfigModelAndQuit: ${targetPath}`);
 		return Promise.resolve(this.extensionService.whenInstalledExtensionsRegistered())
 			.then(() => this.writeConfigModel(targetPath))
-			.finally(() => this.commandService.executeCommand('workbench.action.quit'))
+			.finally(() => {
+				console.log('finally');
+				exists(targetPath).then(does => {
+					console.log(does);
+				});
+				return this.commandService.executeCommand('workbench.action.quit');
+			})
 			.then(() => { });
 	}
 
@@ -50,6 +57,7 @@ export class DefaultConfigurationExportHelper {
 		const config = this.getConfigModel();
 
 		const resultString = JSON.stringify(config, undefined, '  ');
+		console.log(`Writing ` + targetPath);
 		return writeFile(targetPath, resultString);
 	}
 
@@ -61,6 +69,7 @@ export class DefaultConfigurationExportHelper {
 
 		const processProperty = (name: string, prop: IConfigurationPropertySchema) => {
 			if (processedNames.has(name)) {
+				console.log(`fail`);
 				throw new Error('Setting is registered twice: ' + name);
 			}
 
