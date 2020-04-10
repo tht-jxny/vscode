@@ -441,6 +441,7 @@ gulp.task('vscode-translations-import', function () {
 
 // This task is only run for the MacOS build
 const generateVSCodeConfigurationTask = task.define('generate-vscode-configuration', () => {
+	console.log(`starting`);
 	return new Promise((resolve, reject) => {
 		const buildDir = process.env['AGENT_BUILDDIRECTORY'];
 		if (!buildDir) {
@@ -448,6 +449,7 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		}
 
 		if (process.env.VSCODE_QUALITY !== 'insider' && process.env.VSCODE_QUALITY !== 'stable') {
+			console.log(`VSCODE_QUALITY not set`);
 			return resolve();
 		}
 
@@ -455,9 +457,12 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		const extensionsDir = path.join(os.tmpdir(), 'tmpextdir');
 		const appName = process.env.VSCODE_QUALITY === 'insider' ? 'Visual\\ Studio\\ Code\\ -\\ Insiders.app' : 'Visual\\ Studio\\ Code.app';
 		const appPath = path.join(buildDir, `VSCode-darwin/${appName}/Contents/Resources/app/bin/code`);
+
+		console.log(`exec: ${appPath} --export-default-configuration='${allConfigDetailsPath}' --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
 		const codeProc = cp.exec(`${appPath} --export-default-configuration='${allConfigDetailsPath}' --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
 
 		const timer = setTimeout(() => {
+			console.log(`timeout`);
 			codeProc.kill();
 			reject(new Error('export-default-configuration process timed out'));
 		}, 10 * 1000);
@@ -466,11 +471,13 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		codeProc.stderr.on('data', d => console.log(d.toString()));
 
 		codeProc.on('exit', () => {
+			console.log(`exit`);
 			clearTimeout(timer);
 			resolve();
 		});
 
 		codeProc.on('error', err => {
+			console.log(`error`);
 			clearTimeout(timer);
 			reject(err);
 		});
@@ -483,11 +490,11 @@ gulp.task(task.define(
 	task.series(
 		generateVSCodeConfigurationTask,
 		() => {
-			if (!shouldSetupSettingsSearch()) {
-				const branch = process.env.BUILD_SOURCEBRANCH;
-				console.log(`Only runs on master and release branches, not ${branch}`);
-				return;
-			}
+			// if (!shouldSetupSettingsSearch()) {
+			// 	const branch = process.env.BUILD_SOURCEBRANCH;
+			// 	console.log(`Only runs on master and release branches, not ${branch}`);
+			// 	return;
+			// }
 
 			if (!fs.existsSync(allConfigDetailsPath)) {
 				throw new Error(`configuration file at ${allConfigDetailsPath} does not exist`);
