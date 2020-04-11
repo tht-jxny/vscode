@@ -65,15 +65,8 @@ export class DefaultConfigurationExportHelper {
 		const configRegistry = Registry.as<IConfigurationRegistry>(Extensions.Configuration);
 		const configurations = configRegistry.getConfigurations().slice();
 		const settings: IExportedConfigurationNode[] = [];
-		const processedNames = new Set<string>();
 
 		const processProperty = (name: string, prop: IConfigurationPropertySchema) => {
-			if (processedNames.has(name)) {
-				console.log(`fail`);
-				throw new Error('Setting is registered twice: ' + name);
-			}
-
-			processedNames.add(name);
 			const propDetails: IExportedConfigurationNode = {
 				name,
 				description: prop.description || prop.markdownDescription || '',
