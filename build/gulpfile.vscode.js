@@ -460,6 +460,7 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 
 		console.log(`exec: ${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
 		const codeProc = cp.exec(`${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`, (err, stdout, stderr) => {
+			console.log('callback: ' + Date.now());
 			if (err) {
 				console.log(`err: ${err} ${err.message} ${err.toString()}`);
 			}
@@ -478,7 +479,7 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		codeProc.stderr.on('data', d => console.log(d.toString()));
 
 		codeProc.on('exit', () => {
-			console.log(`exit`);
+			console.log(`exit: ` + Date.now());
 			clearTimeout(timer);
 			resolve();
 		});
@@ -506,7 +507,7 @@ gulp.task(task.define(
 			// }
 
 			console.log('wait a couple seconds');
-			await new Promise(resolve => setTimeout(resolve, 2000));
+			await new Promise(resolve => setTimeout(resolve, 3000));
 
 			if (!fs.existsSync(allConfigDetailsPath)) {
 				throw new Error(`configuration file at ${allConfigDetailsPath} does not exist`);
