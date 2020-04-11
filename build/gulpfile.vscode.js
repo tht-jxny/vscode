@@ -458,8 +458,8 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		const appName = process.env.VSCODE_QUALITY === 'insider' ? 'Visual\\ Studio\\ Code\\ -\\ Insiders.app' : 'Visual\\ Studio\\ Code.app';
 		const appPath = path.join(buildDir, `VSCode-darwin/${appName}/Contents/Resources/app/bin/code`);
 
-		console.log(`exec: ${appPath} --export-default-configuration='${allConfigDetailsPath}' --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
-		const codeProc = cp.exec(`${appPath} --export-default-configuration='${allConfigDetailsPath}' --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
+		console.log(`exec: ${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
+		const codeProc = cp.exec(`${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
 
 		const timer = setTimeout(() => {
 			console.log(`timeout`);
@@ -485,6 +485,7 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 });
 
 const allConfigDetailsPath = path.join(os.tmpdir(), 'configuration.json');
+console.log('tmp exists: ' + fs.existsSync(os.tmpdir()));
 gulp.task(task.define(
 	'upload-vscode-configuration',
 	task.series(
