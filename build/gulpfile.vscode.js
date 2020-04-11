@@ -459,7 +459,14 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 		const appPath = path.join(buildDir, `VSCode-darwin/${appName}/Contents/Resources/app/bin/code`);
 
 		console.log(`exec: ${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
-		const codeProc = cp.exec(`${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`);
+		const codeProc = cp.exec(`${appPath} --export-default-configuration=${allConfigDetailsPath} --wait --user-data-dir='${userDataDir}' --extensions-dir='${extensionsDir}'`, (err, stdout, stderr) => {
+			if (err) {
+				console.log(`err: ${err} ${err.message} ${err.toString()}`);
+			}
+
+			console.log(`stdout: ${stdout}`);
+			console.log(`stderr: ${stderr}`);
+		});
 
 		const timer = setTimeout(() => {
 			console.log(`timeout`);
@@ -485,17 +492,21 @@ const generateVSCodeConfigurationTask = task.define('generate-vscode-configurati
 });
 
 const allConfigDetailsPath = path.join(os.tmpdir(), 'configuration.json');
+console.log(`tmp: ${os.tmpdir()}`);
 console.log('tmp exists: ' + fs.existsSync(os.tmpdir()));
 gulp.task(task.define(
 	'upload-vscode-configuration',
 	task.series(
 		generateVSCodeConfigurationTask,
-		() => {
+		async () => {
 			// if (!shouldSetupSettingsSearch()) {
 			// 	const branch = process.env.BUILD_SOURCEBRANCH;
 			// 	console.log(`Only runs on master and release branches, not ${branch}`);
 			// 	return;
 			// }
+
+			console.log('wait a couple seconds');
+			await new Promise(resolve => setTimeout(resolve, 2000));
 
 			if (!fs.existsSync(allConfigDetailsPath)) {
 				throw new Error(`configuration file at ${allConfigDetailsPath} does not exist`);
