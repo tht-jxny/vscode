@@ -43,8 +43,8 @@ export class DefaultConfigurationExportHelper {
 		console.log(`writeConfigModelAndQuit: ${targetPath}`);
 		return Promise.resolve(this.extensionService.whenInstalledExtensionsRegistered())
 			.then(() => this.writeConfigModel(targetPath))
-			.finally(() => {
-				console.log('finally');
+			.then(() => {
+				console.log('not finally');
 				exists(targetPath).then(does => {
 					console.log(does);
 				});
